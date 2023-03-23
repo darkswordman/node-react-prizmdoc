@@ -346,6 +346,7 @@ var PCCViewer = window.PCCViewer || {};
         this.viewerControl = {};
         // DOM Nodes
         this.viewerNodes = {
+            // $download: viewer.$dom.find(".custom-pull-right"),
             $download: viewer.$dom.find("[data-pcc-download]"),
             $pageList: viewer.$dom.find("[data-pcc-pageList]"),
             $nav: viewer.$dom.find("[data-pcc-nav]"),

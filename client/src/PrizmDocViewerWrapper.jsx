@@ -123,7 +123,7 @@ const PrizmDocViewerWrapper = (props) => {
           // Use `options.uiElements.printing` to hide or show the Print Button.
           // Default is `true`.
           printing: true,
-          fullScreenOnInit: true,
+          fullScreenOnInit: false,
           
           /** 
            * comparisonTools : string <optional>
