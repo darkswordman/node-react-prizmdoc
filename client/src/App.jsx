@@ -7,6 +7,17 @@ function App() {
   const [viewingSessionId, setViewingSessionId] = useState(null);
   const [error, setError] = useState(null);
   const [viewerControl, setViewerControl] = useState(null);
+  const [currentPage, setCurrentPage] = useState(1);
+
+  /** Used to subscribe to events when the viewer control is initialized */
+  useEffect(() => {
+    if (viewerControl !== null) {
+      console.log('new event')
+      viewerControl.on("PageChanged", (e) => {
+        setCurrentPage(e.pageNumber);
+      });
+    }
+  }, [viewerControl]);
 
   // Ask the application server to create a viewing session for example.pdf.
   useEffect(() => {
@@ -40,21 +51,39 @@ function App() {
     <>
       {!error && (
         <>
-          <h1>A title</h1>
+          <div
+            style={{
+              display: "flex",
+              width: "100%",
+              flexDirection: "row",
+              gap: "10px",
+            }}
+          >
+            <button>Version 1.0</button>
+            <button>Version 2.0</button>
+            <button>Version 3.0</button>
+            <button>Version 4.0</button>
+          </div>
           <PrizmDocViewerWrapper
             viewingSessionId={viewingSessionId} // Use the viewingSessionId as input to construct the viewer.
             style={{ width: "100%", height: "calc(100vh - 69.52px)" }} // Set the style of the container element which will become the viewer. The width and height will affect how much space the viewer will occupy.
             onViewerReady={setViewerControl} // Once the viewer is ready, update our component state to store a reference to the viewerControl so we can programmatically interact with it (see page navigation example below).
+            on
           />
-          <div class="custom-pull-right">
-            <button class="myCustomApprovedButton">Approve</button>
+          <div style={{ display: "flex", width: "100%" }}>
+            <input value={viewerControl?.getScaleFactor()} />
+            <input value={viewerControl?.getPageNumber()} />
+            <input value={currentPage} />
+          </div>
+          <div className="custom-pull-right">
+            <button className="myCustomApprovedButton">Approve</button>
             <button
-              class="pcc-icon pcc-icon-print"
+              className="pcc-icon pcc-icon-print"
               data-pcc-print="launch"
             ></button>
             <button
               data-pcc-download
-              class="pcc-icon pcc-icon-download"
+              className="pcc-icon pcc-icon-download"
             ></button>
           </div>
 
@@ -66,7 +95,9 @@ function App() {
             </p>
             <button
               disabled={!viewerControl}
-              onClick={() => viewerControl.changeToPrevPage()}
+              onClick={() => {
+                viewerControl.changeToPrevPage();
+              }}
             >
               Previous Page
             </button>
