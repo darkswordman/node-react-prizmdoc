@@ -1,8 +1,7 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState, useRef } from "react";
 
 // Required to avoid reversal proxy and work correctly in development mode with vite
-export const baseUrl = 'http://localhost:8888';
-
+export const baseUrl = "http://localhost:8888";
 
 // The route you've configured in your web application to serve the static
 // viewer-assets (JavaScript, CSS, etc.).
@@ -13,7 +12,7 @@ export const baseUrl = 'http://localhost:8888';
 // configured to serve all files in `client/build` (the entire React
 // application) at the root route (`/`). So, for this sample, these files will
 // be available at the base route `/viewer-assets`.
-const VIEWER_ASSETS_BASE_ROUTE = '/viewer-assets';
+const VIEWER_ASSETS_BASE_ROUTE = "/viewer-assets";
 
 // The route you've configured in your web application to act as a proxy to
 // PAS (so the viewer can make HTTP requests to PAS, part of the PrizmDoc
@@ -22,7 +21,7 @@ const VIEWER_ASSETS_BASE_ROUTE = '/viewer-assets';
 // See `server/app.js` where this route is defined.
 const PAS_PROXY_BASE_ROUTE = `${baseUrl}/pas-proxy`;
 
-const PrizmDocViewerWrapper = props => {
+const PrizmDocViewerWrapper = (props) => {
   const [preRequisitesReady, setPreRequisitesReady] = useState(false);
   const [viewerConstructed, setViewerConstructed] = useState(false);
   const [preReqError, setPreReqError] = useState(null);
@@ -37,14 +36,18 @@ const PrizmDocViewerWrapper = props => {
         // These resources can be safely loaded in parallel.
         await Promise.all([
           injectScript(`${VIEWER_ASSETS_BASE_ROUTE}/js/viewercontrol.js`),
-          injectScript(`${VIEWER_ASSETS_BASE_ROUTE}/js/viewerCustomizations.js`),
+          injectScript(
+            `${VIEWER_ASSETS_BASE_ROUTE}/js/viewerCustomizations.js`
+          ),
           injectScript(`${VIEWER_ASSETS_BASE_ROUTE}/js/jquery-3.6.0.min.js`),
           injectScript(`${VIEWER_ASSETS_BASE_ROUTE}/js/underscore.min.js`),
           injectCss(`${VIEWER_ASSETS_BASE_ROUTE}/css/viewer.css`),
           injectCss(`${VIEWER_ASSETS_BASE_ROUTE}/css/normalize.min.css`),
         ]);
         // These resources must be loaded last, and in this order.
-        await injectScript(`${VIEWER_ASSETS_BASE_ROUTE}/js/jquery.hotkeys.min.js`);
+        await injectScript(
+          `${VIEWER_ASSETS_BASE_ROUTE}/js/jquery.hotkeys.min.js`
+        );
         await injectScript(`${VIEWER_ASSETS_BASE_ROUTE}/js/viewer.js`);
         setPreRequisitesReady(true);
       } catch (err) {
@@ -56,16 +59,15 @@ const PrizmDocViewerWrapper = props => {
   // Initialize the viewer.
   useEffect(() => {
     if (preRequisitesReady && viewingSessionId && !viewerConstructed) {
-
       // This is where the non-React viewer is actually initialized, and where
       // you can customize the viewer construction options. See
       // https://help.accusoft.com/PrizmDoc/latest/HTML/external-jQuery.fn.html#~Options
       const container = window.$(containerRef.current).pccViewer({
         documentID: viewingSessionId,
-        imageHandlerUrl: PAS_PROXY_BASE_ROUTE,                     // Base path the viewer should use to make requests to PAS (PrizmDoc Application Services).
-        viewerAssetsPath: VIEWER_ASSETS_BASE_ROUTE,                // Base path the viewer should use for static assets
-        resourcePath: `${VIEWER_ASSETS_BASE_ROUTE}/img`,           // Base path the viewer should use for images
-        language: window.viewerCustomizations.languages['es-CL'],
+        imageHandlerUrl: PAS_PROXY_BASE_ROUTE, // Base path the viewer should use to make requests to PAS (PrizmDoc Application Services).
+        viewerAssetsPath: VIEWER_ASSETS_BASE_ROUTE, // Base path the viewer should use for static assets
+        resourcePath: `${VIEWER_ASSETS_BASE_ROUTE}/img`, // Base path the viewer should use for images
+        language: window.viewerCustomizations.languages["es-CL"],
         template: window.viewerCustomizations.template,
         icons: window.viewerCustomizations.icons,
         annotationsMode: "LayeredAnnotations", // Use the new "LayeredAnnotations" system, which will persist annotation data as JSON (instead of the default "LegacyAnnotations" system, which uses a different XML format)
@@ -75,21 +77,69 @@ const PrizmDocViewerWrapper = props => {
           enableMultipleRedactionReasons: true, // Allow users to apply multiple redaction reasons to a single redaction (requires a backend running version 13.13 or higher)
 
           // TODO: Define your own set of redaction reasons for your users to pick from:
-          reasons: [{
-            reason: '1.a',                   // Text to apply to the redaction itself.
-            description: 'Client Privilege'  // Optional extended description the user will see when choosing from the list of redaction reasons.
-          }, {
-            reason: '1.b',
-            description: 'Privacy Information'
-          }, {
-            reason: '1.c'
-          }]
+          reasons: [
+            {
+              reason: "1.a", // Text to apply to the redaction itself.
+              description: "Client Privilege", // Optional extended description the user will see when choosing from the list of redaction reasons.
+            },
+            {
+              reason: "1.b",
+              description: "Privacy Information",
+            },
+            {
+              reason: "1.c",
+            },
+          ],
         },
         uiElements: {
-          attachments: true,                 // Enable the email attachments UI
-          advancedSearch: true,              // Enable advanced search
+          attachments: false, // Enable the email attachments UI
+          advancedSearch: false, // Enable advanced search
+          // Use `options.uiElements.viewTab` to hide or show the View Tab.
+          // Default is `true`.
+          viewTab: true,
+
+          // Use `options.uiElements.searchTab` to hide or show the Search Tab.
+          // Default is `true`.
+          searchTab: false,
+
+          // Use `options.uiElements.annotateTab` to hide or show the Annotate tab.
+          // Default is `true`.
+          annotateTab: false,
+
+          // Use `options.uiElements.redactTab` to hide or show the Redact tab.
+          // Default is `true`.
+          redactTab: false,
+
+          esignTab: false,
+
+          // Use `options.uiElements.copyPaste` to hide or show the Text Select Tool.
+          // Default is `true`.
+          copyPaste: false,
+
+          // Use `options.uiElements.download` to hide or show the Download Button.
+          // Default is `true`.
+          download: true,
+
+          // Use `options.uiElements.printing` to hide or show the Print Button.
+          // Default is `true`.
+          printing: true,
+          fullScreenOnInit: true,
+          
+          /** 
+           * comparisonTools : string <optional>
+            Default: "availableIfRevisions"
+            Sets the mode of the comparison tools. The following options are available:
+
+            "notAvailable": No toggle button shown, panel is not able to be opened.
+            "available": Toggle button shown, panel must be opened by clicking the button.
+            "active": Toggle button shown, panel is displayed on initialization.
+            "availableIfRevisions": Toggle button shown if revisions exist, panel must be opened by clicking the button.
+            "activeIfRevisions": Toggle button shown if revisions exist, panel is displayed as soon as revisions are returned.
+           */
+          comparisonTools: 'active'
+
         },
-        immediateActionMenuMode: "hover",    // Enable immediate action menu
+        immediateActionMenuMode: "hover", // Enable immediate action menu
         attachmentViewingMode: "ThisViewer", // The email attachment will be opened in the same view
       });
 
@@ -97,10 +147,13 @@ const PrizmDocViewerWrapper = props => {
 
       // If an onViewerReady handler was provided, then call the handler with
       // the actual viewerControl instance once the viewer is ready.
-      if (typeof(onViewerReady) === 'function') {
-        container.viewerControl.on(window.PCCViewer.EventType.ViewerReady, () => {
-          onViewerReady(container.viewerControl);
-        });
+      if (typeof onViewerReady === "function") {
+        container.viewerControl.on(
+          window.PCCViewer.EventType.ViewerReady,
+          () => {
+            onViewerReady(container.viewerControl);
+          }
+        );
       }
     }
   }, [preRequisitesReady, viewingSessionId, viewerConstructed, onViewerReady]);
@@ -108,41 +161,48 @@ const PrizmDocViewerWrapper = props => {
   // Render the div tag which will be converted into the viewer.
   return (
     <>
-      { !preReqError &&
-        <div ref={containerRef} style={props.style} />
-      }
-      { preReqError &&
+      {!preReqError && <div ref={containerRef} style={props.style} />}
+      {preReqError && (
         <div className="error">
-        <h2>Error Loading Viewer Prerequisites</h2>
-        <p>
-          There was a problem loading the required JavaScript and CSS files which the viewer depends on:
-        </p>
-        <pre>
-          {preReqError.message}
-        </pre>
-        <p>
-          Make sure that:
-          <ul>
-            <li>You have added the static <code>viewer-assets</code>directory to your web application.</li>
-            <li>You have configured a static route in your web application to serve the <code>viewer-assets</code>.</li>
-            <li>You have configured the <code>VIEWER_ASSETS_BASE_ROUTE</code> in <code>PrizmDocViewerWrapper.jsx</code> to use the correct base route to the static <code>viewer-assets</code>.</li>
-          </ul>
-        </p>
-      </div>
-      }
+          <h2>Error Loading Viewer Prerequisites</h2>
+          <p>
+            There was a problem loading the required JavaScript and CSS files
+            which the viewer depends on:
+          </p>
+          <pre>{preReqError.message}</pre>
+          <p>
+            Make sure that:
+            <ul>
+              <li>
+                You have added the static <code>viewer-assets</code>directory to
+                your web application.
+              </li>
+              <li>
+                You have configured a static route in your web application to
+                serve the <code>viewer-assets</code>.
+              </li>
+              <li>
+                You have configured the <code>VIEWER_ASSETS_BASE_ROUTE</code> in{" "}
+                <code>PrizmDocViewerWrapper.jsx</code> to use the correct base
+                route to the static <code>viewer-assets</code>.
+              </li>
+            </ul>
+          </p>
+        </div>
+      )}
     </>
   );
+};
+
+function injectScript(src) {
+  return injectHeadResource("script", "src", src, { async: true });
 }
 
-function injectScript (src) {
-  return injectHeadResource('script', 'src', src, { async: true });
+function injectCss(href) {
+  return injectHeadResource("link", "href", href, { rel: "stylesheet" });
 }
 
-function injectCss (href) {
-  return injectHeadResource('link', 'href', href, { rel: 'stylesheet' });
-}
-
-function injectHeadResource (tagName, urlPropertyName, urlValue, attributes) {
+function injectHeadResource(tagName, urlPropertyName, urlValue, attributes) {
   return new Promise((resolve, reject) => {
     const tag = document.createElement(tagName);
     tag[urlPropertyName] = urlValue;
@@ -155,13 +215,13 @@ function injectHeadResource (tagName, urlPropertyName, urlValue, attributes) {
       tag.onerror = null;
       tag.onload = null;
       resolve(tag);
-    }
+    };
 
     tag.onerror = () => {
       tag.onerror = null;
       tag.onload = null;
       reject(new Error(`Failed to load ${urlValue}`));
-    }
+    };
 
     document.head.appendChild(tag);
   });
