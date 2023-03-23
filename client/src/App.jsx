@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import './App.css';
 import ErrorBanner from './ErrorBanner';
-import PrizmDocViewerWrapper from './PrizmDocViewerWrapper';
+import PrizmDocViewerWrapper, { baseUrl } from './PrizmDocViewerWrapper';
 
 function App() {
   const [viewingSessionId, setViewingSessionId] = useState(null);
@@ -15,7 +15,7 @@ function App() {
         // Tell the application server we want to begin viewing example.pdf. The
         // application server will create a new viewing session and return us
         // the viewingSessionId (which we need to instantiate the viewer below).
-        const res = await fetch(`/beginViewing?document=example.pdf`, { method: 'POST' });
+        const res = await fetch(`${baseUrl}/compareDocuments?document=example.pdf`, { method: 'POST' });
 
         // Make sure we received an HTTP 200 response.
         if (!res.ok) {
@@ -33,9 +33,9 @@ function App() {
   // Render our page content.
   return (
     <>
-      <h1>Hello PrizmDoc Viewer!</h1>
+      <h1>Hello from PrizmDoc Viewer!</h1>
 
-      <p>This is a minimal React application which integrates PrizmDoc Viewer. Node.js is used for an example application server. This application simply loads an example document with PrizmDoc Viewer, like this:</p>
+      <p>This is a minimal Reacts application which integrates Priz mDoc Viewer. Node.js is used for an example application server. This application simply loads an example document with PrizmDoc Viewer, like this:</p>
 
       { !error &&
         <>

@@ -1,5 +1,9 @@
 import React, { useEffect, useState, useRef } from 'react';
 
+// Required to avoid reversal proxy and work correctly in development mode with vite
+export const baseUrl = 'http://localhost:8888';
+
+
 // The route you've configured in your web application to serve the static
 // viewer-assets (JavaScript, CSS, etc.).
 //
@@ -16,7 +20,7 @@ const VIEWER_ASSETS_BASE_ROUTE = '/viewer-assets';
 // Viewer backend.)
 //
 // See `server/app.js` where this route is defined.
-const PAS_PROXY_BASE_ROUTE = '/pas-proxy';
+const PAS_PROXY_BASE_ROUTE = `${baseUrl}/pas-proxy`;
 
 const PrizmDocViewerWrapper = props => {
   const [preRequisitesReady, setPreRequisitesReady] = useState(false);
@@ -61,7 +65,7 @@ const PrizmDocViewerWrapper = props => {
         imageHandlerUrl: PAS_PROXY_BASE_ROUTE,                     // Base path the viewer should use to make requests to PAS (PrizmDoc Application Services).
         viewerAssetsPath: VIEWER_ASSETS_BASE_ROUTE,                // Base path the viewer should use for static assets
         resourcePath: `${VIEWER_ASSETS_BASE_ROUTE}/img`,           // Base path the viewer should use for images
-        language: window.viewerCustomizations.languages['en-US'],
+        language: window.viewerCustomizations.languages['es-CL'],
         template: window.viewerCustomizations.template,
         icons: window.viewerCustomizations.icons,
         annotationsMode: "LayeredAnnotations", // Use the new "LayeredAnnotations" system, which will persist annotation data as JSON (instead of the default "LegacyAnnotations" system, which uses a different XML format)

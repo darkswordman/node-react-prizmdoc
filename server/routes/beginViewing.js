@@ -1,10 +1,15 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
-const joinPath = require('path').join;
-const fs = require('fs');
-const promisify = require('util').promisify;
+const joinPath = require("path").join;
+const fs = require("fs");
+const promisify = require("util").promisify;
 const readFile = promisify(fs.readFile);
-const pas = require('../pas/pasRequest');
+const pas = require("../pas/pasRequest");
+
+// Util function to read a document from the `documents/` directory
+async function readFileFromDocumentsDirectory(filename) {
+  return readFile(joinPath(__dirname, "..", "documents", filename));
+}
 
 // This route will be called by the client whenever it needs to view a document.
 // This route will contact PAS (part of the PrizmDoc Viewer backend) to create a
@@ -20,38 +25,79 @@ const pas = require('../pas/pasRequest');
 // to instantiate the viewer. This route handler is responsible for all of the
 // communication with PAS to create the viewing session and upload the actual
 // source document.
-router.post('/beginViewing', async (req, res /*, next*/) => {
+router.post("/beginViewing", async (req, res /*, next*/) => {
   let prizmdocRes;
 
   const document = req.query.document;
 
   // 1. Ask PAS to create a new viewing session.
-  prizmdocRes = await pas.post('/ViewingSession', { // See https://help.accusoft.com/PrizmDoc/latest/HTML/pas-viewing-sessions.html#post-viewingsession
+  prizmdocRes = await pas.post("/ViewingSession", {
+    // See https://help.accusoft.com/PrizmDoc/latest/HTML/pas-viewing-sessions.html#post-viewingsession
     json: {
       source: {
-        type: 'upload',
-        displayName: document
-      }
-    }
+        type: "upload",
+        displayName: document,
+      },
+    },
   });
   const viewingSessionId = prizmdocRes.body.viewingSessionId;
 
   // 2. Send the new viewingSessionId to the client so that it can begin rendering the viewer.
-  res.setHeader('Content-Type', 'application/json');
+  res.setHeader("Content-Type", "application/json");
   res.send(JSON.stringify({ viewingSessionId }));
   res.end();
 
   // 3. Upload the actual source document to PAS so that it can start being
   //    converted to SVG. The viewer will request this content and receive it
   //    automatically once it is ready.
-  prizmdocRes = await pas.put(`/ViewingSession/u${viewingSessionId}/SourceFile`, {
-    body: await(readFileFromDocumentsDirectory(document))
-  });
+  prizmdocRes = await pas.put(
+    `/ViewingSession/u${viewingSessionId}/SourceFile`,
+    {
+      body: await readFileFromDocumentsDirectory('to_compare_1.docx'),
+    }
+  );
 });
 
-// Util function to read a document from the `documents/` directory
-async function readFileFromDocumentsDirectory(filename) {
-  return readFile(joinPath(__dirname, '..', 'documents', filename));
-}
+router.post("/compareDocuments", async (req, res /*, next*/) => {
+  let prizmdocRes;
+
+  const document = req.query.document;
+
+  // 1. Ask PAS to create a new viewing session.
+  prizmdocRes = await pas.post("/ViewingSession", {
+    // See https://help.accusoft.com/PrizmDoc/latest/HTML/pas-viewing-sessions.html#post-viewingsession
+    json: {
+      source: {
+        type: "upload",
+        displayName: document,
+      },
+    },
+  });
+
+  // Get the viewing session id required for everything
+  const viewingSessionId = prizmdocRes.body.viewingSessionId;
+
+  // 2. Send the new viewingSessionId to the client so that it can begin rendering the viewer.
+  res.setHeader("Content-Type", "application/json");
+  res.send(JSON.stringify({ viewingSessionId }));
+  res.end();
+
+  // 3. Upload the actual source document to PAS so that it can start being
+  //    converted to SVG. The viewer will request this content and receive it
+  //    automatically once it is ready.
+  prizmdocRes = await pas.put(
+    `/v2/viewingSessions/${viewingSessionId}/sourceFile/original`,
+    {
+      body: await readFileFromDocumentsDirectory('to_compare_1.docx'),
+    }
+  );
+
+  prizmdocRes = await pas.put(
+    `/v2/viewingSessions/${viewingSessionId}/sourceFile/revised`,
+    {
+      body: await readFileFromDocumentsDirectory('to_compare_2.docx'),
+    }
+  );
+});
 
 module.exports = router;
