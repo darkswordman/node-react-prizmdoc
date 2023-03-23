@@ -100,4 +100,46 @@ router.post("/compareDocuments", async (req, res /*, next*/) => {
   );
 });
 
+router.post("/compareDocumentsPdf", async (req, res /*, next*/) => {
+  let prizmdocRes;
+
+  const document = req.query.document;
+
+  // 1. Ask PAS to create a new viewing session.
+  prizmdocRes = await pas.post("/ViewingSession", {
+    // See https://help.accusoft.com/PrizmDoc/latest/HTML/pas-viewing-sessions.html#post-viewingsession
+    json: {
+      source: {
+        type: "upload",
+        displayName: document,
+      },
+    },
+  });
+
+  // Get the viewing session id required for everything
+  const viewingSessionId = prizmdocRes.body.viewingSessionId;
+
+  // 2. Send the new viewingSessionId to the client so that it can begin rendering the viewer.
+  res.setHeader("Content-Type", "application/json");
+  res.send(JSON.stringify({ viewingSessionId }));
+  res.end();
+
+  // 3. Upload the actual source document to PAS so that it can start being
+  //    converted to SVG. The viewer will request this content and receive it
+  //    automatically once it is ready.
+  prizmdocRes = await pas.put(
+    `/v2/viewingSessions/${viewingSessionId}/sourceFile/original`,
+    {
+      body: await readFileFromDocumentsDirectory('to_compare_1.pdf'),
+    }
+  );
+
+  prizmdocRes = await pas.put(
+    `/v2/viewingSessions/${viewingSessionId}/sourceFile/revised`,
+    {
+      body: await readFileFromDocumentsDirectory('to_compare_2.pdf'),
+    }
+  );
+});
+
 module.exports = router;
