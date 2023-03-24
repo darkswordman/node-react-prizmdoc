@@ -18,7 +18,8 @@
     "test": "react-scripts test",
     "eject": "react-scripts eject",
     "dev": "vite",
-    "build:vite": "vite build"
+    "build:vite": "vite build",
+    "preview": "vite preview"
   },
   "proxy": "http://localhost:8888",
   "eslintConfig": {
